@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import emailjs from '@emailjs/browser';
 import Scene from '@/components/cinematic/Scene';
 import Magnetic from '@/components/cinematic/Magnetic';
+import CinematicText from '@/components/cinematic/CinematicText';
 
 const ContactSection = () => {
   const { toast } = useToast();
@@ -74,9 +75,9 @@ const ContactSection = () => {
           <p className="cine-scene-label">Scene 06 — Contact</p>
         </Scene>
 
-        <Scene className="text-center">
+        <Scene className="text-center" keylight>
           <h2 className="text-3xl lg:text-4xl font-orbitron font-bold mb-4">
-            <span className="heading-gradient">Get In Touch</span>
+            <CinematicText className="heading-gradient" stagger={90}>Get In Touch</CinematicText>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto mb-12">
             Have a project in mind, a collaboration proposal, or want to discuss opportunities? Feel free to reach out!
@@ -85,7 +86,7 @@ const ContactSection = () => {
         
         <div className="grid md:grid-cols-5 gap-8 items-stretch">
           {/* Contact Details Column */}
-          <Scene direction="right" delay={150} className="md:col-span-2">
+          <Scene direction="right" delay={260} distance={26} className="md:col-span-2">
             <div className="bg-tech-black/60 backdrop-blur-sm p-6 md:p-8 rounded-xl h-full border border-tech-gray/60 cine-card flex flex-col justify-between">
               <div>
                 <h3 className="text-xl font-orbitron mb-6 text-white flex items-center gap-2">
@@ -183,7 +184,7 @@ const ContactSection = () => {
           </Scene>
           
           {/* Contact Form Column */}
-          <Scene direction="left" delay={250} className="md:col-span-3">
+          <Scene direction="left" delay={420} distance={26} className="md:col-span-3">
             <form onSubmit={handleSubmit} className="bg-tech-black/60 backdrop-blur-sm p-6 md:p-8 rounded-xl border border-tech-gray/60 cine-card">
               <h3 className="text-xl font-orbitron mb-6 text-white">Send a Message</h3>
               

@@ -1,133 +1,83 @@
-import React from 'react';
-import { useCinematicNavigate, TransitionState, TransitionDirection } from '@/context/TransitionContext';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useCinematicNavigate } from '@/context/TransitionContext';
 
-interface PageTransitionProps {
-  children: React.ReactNode;
-}
+/**
+ * The stage the routed page sits on, plus the curtain that covers it.
+ *
+ * The page content is *never* unmounted by this component — React Router
+ * swaps it underneath while the curtain is opaque, so there is no white
+ * flash and no layout shift between chapters.
+ */
+const PageTransition: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const {
+    state,
+    curtainPhase,
+    instantCurtain,
+    direction,
+    chapter,
+    showChapter,
+    showStreak,
+    isBooting,
+    reducedMotion,
+  } = useCinematicNavigate();
 
-export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
-  const { state, direction, chapter } = useCinematicNavigate();
+  const location = useLocation();
+  const [booted, setBooted] = useState(false);
 
-  const isTransitioning = state !== 'idle';
-  const showWipeOverlay = state === 'wiping' || state === 'exiting' || state === 'revealing';
-  const showChapterTitle = state === 'wiping';
+  useEffect(() => {
+    if (!isBooting) setBooted(true);
+  }, [isBooting]);
 
-  // Compute wrapper transform & blur styles based on current state
-  const getContentStyle = (): React.CSSProperties => {
-    if (state === 'exiting' || state === 'wiping') {
-      return {
-        opacity: 0,
-        filter: 'blur(8px)',
-        transform: 'scale3d(0.97, 0.97, 1) translate3d(0, 8px, 0)',
-        transition: 'opacity 220ms cubic-bezier(0.16, 1, 0.3, 1), transform 250ms cubic-bezier(0.16, 1, 0.3, 1), filter 220ms ease',
-        willChange: 'opacity, transform, filter',
-      };
-    }
-    if (state === 'revealing') {
-      return {
-        opacity: 1,
-        filter: 'blur(0px)',
-        transform: 'scale3d(1, 1, 1) translate3d(0, 0, 0)',
-        transition: 'opacity 350ms cubic-bezier(0.16, 1, 0.3, 1), transform 380ms cubic-bezier(0.16, 1, 0.3, 1), filter 320ms ease',
-        willChange: 'opacity, transform, filter',
-      };
-    }
-    return {
-      opacity: 1,
-      filter: 'blur(0px)',
-      transform: 'none',
-      transition: 'none',
-    };
-  };
+  const curtainVisible = state !== 'idle';
 
-  // Compute wipe layer CSS transform class based on direction & state
-  const getOverlayClass = (): string => {
-    let base = 'fixed inset-0 z-[9990] bg-[#060606] flex items-center justify-center pointer-events-none transition-all duration-350 ease-out ';
-    
-    if (state === 'idle') {
-      return base + 'opacity-0 pointer-events-none hidden';
-    }
-
-    if (direction === 'vertical') {
-      if (state === 'exiting') return base + 'translate-y-full opacity-100';
-      if (state === 'wiping') return base + 'translate-y-0 opacity-100';
-      if (state === 'revealing') return base + '-translate-y-full opacity-100';
-    }
-
-    if (direction === 'vertical-reverse') {
-      if (state === 'exiting') return base + '-translate-y-full opacity-100';
-      if (state === 'wiping') return base + 'translate-y-0 opacity-100';
-      if (state === 'revealing') return base + 'translate-y-full opacity-100';
-    }
-
-    if (direction === 'horizontal') {
-      if (state === 'exiting') return base + 'translate-x-full opacity-100';
-      if (state === 'wiping') return base + 'translate-x-0 opacity-100';
-      if (state === 'revealing') return base + '-translate-x-full opacity-100';
-    }
-
-    if (direction === 'horizontal-reverse') {
-      if (state === 'exiting') return base + '-translate-x-full opacity-100';
-      if (state === 'wiping') return base + 'translate-x-0 opacity-100';
-      if (state === 'revealing') return base + 'translate-x-full opacity-100';
-    }
-
-    if (direction === 'push') {
-      if (state === 'exiting') return base + 'scale-125 opacity-0';
-      if (state === 'wiping') return base + 'scale-100 opacity-100';
-      if (state === 'revealing') return base + 'scale-90 opacity-0';
-    }
-
-    // Default Fade
-    if (state === 'exiting') return base + 'opacity-40';
-    if (state === 'wiping') return base + 'opacity-100';
-    if (state === 'revealing') return base + 'opacity-0';
-
-    return base;
-  };
+  // The stage's own posture: pulled back while covered, forward once revealed.
+  const stagePosture: 'idle' | 'out' | 'in' =
+    state === 'covering' || state === 'holding' ? 'out' : state === 'revealing' ? 'in' : 'idle';
 
   return (
     <>
-      {/* Page Content Container with Cinematic Exit/Entrance */}
-      <div 
-        className={`w-full min-h-screen ${isTransitioning ? 'pointer-events-none' : ''}`}
-        style={getContentStyle()}
+      <div
+        className={`w-full ${!booted && !reducedMotion ? 'cine-boot' : ''} cine-stage`}
+        data-stage={stagePosture}
+        // Pointer events off mid-cut so a stray click cannot start a
+        // second navigation while the first is still playing.
+        style={{ pointerEvents: curtainVisible ? 'none' : undefined }}
       >
         {children}
       </div>
 
-      {/* Cinematic Wipe Overlay & Chapter Title Card */}
-      {showWipeOverlay && (
-        <div className={getOverlayClass()} aria-hidden="true">
-          {/* Subtle Ambient Radial Lighting */}
-          <div className="absolute inset-0 bg-radial-gradient from-tech-red/15 via-transparent to-transparent opacity-60" />
-          
-          {/* Film Grain Texture */}
-          <div className="cine-grain opacity-5" />
+      {curtainVisible && (
+        <div
+          className="cine-curtain"
+          data-dir={direction}
+          data-phase={curtainPhase}
+          style={instantCurtain ? { transition: 'none' } : undefined}
+          aria-hidden="true"
+        >
+          <div className="cine-curtain-glow" />
+          <div className="cine-grain" style={{ opacity: 0.04 }} />
 
-          {/* Chapter Title Card (Dark Moment) */}
-          <div 
-            className={`relative z-10 text-center px-6 transition-all duration-300 transform ${
-              showChapterTitle 
-                ? 'opacity-100 scale-100 blur-0 translate-y-0' 
-                : 'opacity-0 scale-95 blur-sm translate-y-2'
-            }`}
-          >
-            <p className="text-[10px] sm:text-xs font-orbitron tracking-[0.4em] uppercase text-tech-red/80 mb-2 animate-pulse">
+          {/* Chapter card */}
+          <div className={`cine-chapter ${showChapter ? 'is-showing' : ''}`}>
+            <p className="text-[10px] sm:text-[11px] font-orbitron tracking-[0.5em] uppercase text-tech-red/80 mb-3">
               {chapter.subtitle}
             </p>
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-orbitron font-bold tracking-[0.3em] uppercase bg-gradient-to-r from-white via-gray-200 to-tech-red/80 bg-clip-text text-transparent">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-orbitron font-bold uppercase bg-gradient-to-r from-white via-gray-100 to-tech-red/70 bg-clip-text text-transparent">
               {chapter.title}
-            </h1>
-            <div className="mt-4 mx-auto w-12 h-[1px] bg-gradient-to-r from-transparent via-tech-red to-transparent opacity-80" />
+            </h2>
+            <div className="mt-5 mx-auto w-16 h-px bg-gradient-to-r from-transparent via-tech-red to-transparent" />
           </div>
 
-          {/* Horizontal Lens Light Streak */}
-          {state === 'revealing' && (
-            <div className="cine-lens-streak absolute inset-y-0 left-0 right-0 pointer-events-none" />
-          )}
+          {showStreak && <div className="cine-lens-streak" key={location.key} />}
         </div>
       )}
+
+      {/* Announce chapter changes to screen readers, since the visual
+          chapter card is decorative and hidden from the a11y tree. */}
+      <div className="sr-only" role="status" aria-live="polite">
+        {state === 'holding' ? `${chapter.title} page` : ''}
+      </div>
     </>
   );
 };

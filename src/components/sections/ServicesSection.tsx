@@ -1,6 +1,7 @@
 import React from 'react';
 import Scene from '@/components/cinematic/Scene';
 import Magnetic from '@/components/cinematic/Magnetic';
+import CinematicText from '@/components/cinematic/CinematicText';
 import { useCinematicNavigate } from '@/context/TransitionContext';
 
 const ServicesSection = () => {
@@ -50,9 +51,9 @@ const ServicesSection = () => {
           <p className="cine-scene-label">Scene 04 — Services</p>
         </Scene>
 
-        <Scene className="text-center">
+        <Scene className="text-center" keylight>
           <h2 className="text-3xl lg:text-4xl font-orbitron font-bold mb-12">
-            <span className="heading-gradient">Services</span>
+            <CinematicText className="heading-gradient">Services</CinematicText>
           </h2>
         </Scene>
         
@@ -64,11 +65,11 @@ const ServicesSection = () => {
                 data-cursor="explore"
               >
                 <div>
-                  <div className="w-12 h-12 rounded-full bg-tech-red/10 text-tech-red flex items-center justify-center mb-6 group-hover:bg-tech-red group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-tech-red/40">
+                  <div className="cine-layer-image w-12 h-12 rounded-full bg-tech-red/10 text-tech-red flex items-center justify-center mb-6 group-hover:bg-tech-red group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-tech-red/40">
                     {service.icon}
                   </div>
                   
-                  <h3 className="text-xl font-orbitron text-white mb-3 group-hover:text-tech-red transition-colors duration-300">{service.title}</h3>
+                  <h3 className="cine-layer-copy text-xl font-orbitron text-white mb-3 group-hover:text-tech-red transition-colors duration-300">{service.title}</h3>
                   <p className="text-gray-400 text-sm leading-relaxed">{service.description}</p>
                 </div>
 

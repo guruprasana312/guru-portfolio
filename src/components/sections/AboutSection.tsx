@@ -1,6 +1,8 @@
 
 import React from 'react';
 import Scene from '@/components/cinematic/Scene';
+import CinematicText from '@/components/cinematic/CinematicText';
+import ScrollLayer from '@/components/cinematic/ScrollLayer';
 
 const AboutSection = () => {
   return (
@@ -13,8 +15,10 @@ const AboutSection = () => {
 
         <div className="flex flex-col lg:flex-row gap-16 items-center">
           <Scene direction="right" className="lg:w-1/2 relative">
+            <ScrollLayer speed={-34} scale={0.02}>
             {/* About image or decorative element */}
-            <div className="aspect-square max-w-md mx-auto bg-tech-gray relative rounded-lg p-1 border border-tech-red/30 cine-card">
+            <div className="aspect-square max-w-md mx-auto bg-tech-gray relative rounded-lg p-1 border border-tech-red/30 cine-card"
+              data-cursor-label="Explore">
               <div className="w-full h-full bg-tech-black flex items-center justify-center p-8 rounded-lg">
                 <div className="relative">
                   {/* Code bracket design element */}
@@ -27,6 +31,7 @@ const AboutSection = () => {
                 </div>
               </div>
             </div>
+            </ScrollLayer>
 
             {/* Decorative elements */}
             <div className="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-tech-red/30 rounded-full hidden lg:block"></div>
@@ -34,9 +39,9 @@ const AboutSection = () => {
           </Scene>
 
           <div className="lg:w-1/2">
-            <Scene delay={80}>
+            <Scene delay={80} keylight>
               <h2 className="text-3xl lg:text-4xl font-orbitron font-bold mb-6 inline-block">
-                <span className="heading-gradient">About Me</span>
+                <CinematicText className="heading-gradient">About Me</CinematicText>
               </h2>
             </Scene>
 

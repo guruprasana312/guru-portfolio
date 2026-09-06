@@ -1,17 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
+import { useInView } from '@/hooks/use-cinematic';
 
 type Direction = 'up' | 'down' | 'left' | 'right' | 'none';
 
 interface SceneProps {
   children: React.ReactNode;
   className?: string;
-  /** delay in ms before the reveal starts */
+  /** ms before the reveal starts */
   delay?: number;
   direction?: Direction;
   /** how far the element travels before settling, in px */
   distance?: number;
-  as?: 'div' | 'section' | 'span' | 'li' | 'article';
+  as?: 'div' | 'section' | 'span' | 'li' | 'article' | 'header';
   once?: boolean;
+  /** adds a soft key light behind the content as it resolves */
+  keylight?: boolean;
 }
 
 const offsets: Record<Direction, (d: number) => string> = {
@@ -23,8 +26,8 @@ const offsets: Record<Direction, (d: number) => string> = {
 };
 
 /**
- * Scroll-driven cinematic reveal: blur-to-sharp + subtle scale, opacity and travel.
- * Falls back to an instant reveal when the user prefers reduced motion.
+ * Scroll-driven reveal: blur-to-sharp with a small travel and settle.
+ * One IntersectionObserver per instance, disconnected once fired.
  */
 const Scene = ({
   children,
@@ -34,43 +37,17 @@ const Scene = ({
   distance = 36,
   as: Tag = 'div',
   once = true,
+  keylight = false,
 }: SceneProps) => {
-  const ref = useRef<HTMLElement | null>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced) {
-      setVisible(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            if (once) observer.unobserve(entry.target);
-          } else if (!once) {
-            setVisible(false);
-          }
-        });
-      },
-      { threshold: 0.15, rootMargin: '0px 0px -8% 0px' }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [once]);
+  const [ref, visible] = useInView<HTMLElement>({ once });
 
   return (
     <Tag
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ref={ref as any}
-      className={`cine-reveal ${visible ? 'is-visible' : ''} ${className}`}
+      className={`cine-reveal ${visible ? 'is-visible' : ''} ${
+        keylight ? 'cine-keylight' : ''
+      } ${className}`}
       style={{
         transitionDelay: `${delay}ms`,
         ['--cine-offset' as string]: offsets[direction](distance),
