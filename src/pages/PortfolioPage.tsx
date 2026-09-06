@@ -1,0 +1,16 @@
+import React, { useEffect } from 'react';
+import PortfolioSection from '@/components/sections/PortfolioSection';
+
+const PortfolioPage = () => {
+  useEffect(() => {
+    document.title = "Portfolio — Guruprasana E.S";
+  }, []);
+
+  return (
+    <div className="pt-12 md:pt-20">
+      <PortfolioSection />
+    </div>
+  );
+};
+
+export default PortfolioPage;
