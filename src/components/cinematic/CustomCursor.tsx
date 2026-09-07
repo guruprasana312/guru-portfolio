@@ -15,7 +15,7 @@ const CustomCursor = () => {
   const ringRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLSpanElement>(null);
   const tier = useMotionTier();
-  const enabled = tier === 'full';
+  const enabled = tier !== 'none';
 
   useEffect(() => {
     if (!enabled) return;

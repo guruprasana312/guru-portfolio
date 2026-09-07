@@ -1095,7 +1095,7 @@
  *  A different motion strategy, not a scaled-down desktop one:
  *  transitions and reveals stay, pointer-driven effects go.
  * ================================================================== */
-@media (hover: none), (pointer: coarse) {
+@media (hover: none) and (pointer: coarse) {
   .cine-focus-group:hover > :not(:hover) {
     opacity: 1 !important;
     filter: none !important;

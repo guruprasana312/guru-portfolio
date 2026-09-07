@@ -133,7 +133,7 @@ const CinematicBackground = () => {
       <div className="cine-bg-gradient" />
       <div ref={lightRef} className="absolute inset-0 will-change-transform">
         {tier !== 'none' && <div className="cine-bg-light" />}
-        {tier === 'full' && <div className="cine-bg-light-2" />}
+        {tier !== 'none' && <div className="cine-bg-light-2" />}
       </div>
       <div ref={dustRef} className="absolute inset-0 will-change-transform">
         {tier !== 'none' && <canvas ref={canvasRef} className="cine-bg-canvas" />}

@@ -31,7 +31,7 @@ const Magnetic = ({
   const tier = useMotionTier();
 
   useEffect(() => {
-    if (tier !== 'full') return;
+    if (tier === 'none') return;
     const node = ref.current;
     if (!node) return;
 
@@ -61,11 +61,8 @@ const Magnetic = ({
       frame = requestAnimationFrame(loop);
     };
 
-    // Cache geometry. Reading layout on every mousemove for every
-    // magnetic element on the page is the expensive way to do this;
-    // the rect only actually changes on scroll and resize.
     let rect = node.getBoundingClientRect();
-    let geomDirty = false;
+    let geomDirty = true;
     const markDirty = () => { geomDirty = true; };
     const refresh = () => {
       if (!geomDirty) return;
@@ -95,15 +92,15 @@ const Magnetic = ({
       }
     };
 
-    // Reveal animations move things around after mount, so re-measure
-    // once the entrance choreography has settled.
     const settleTimers = [900, 2200].map((ms) => window.setTimeout(markDirty, ms));
 
     window.addEventListener('mousemove', onMove, { passive: true });
+    node.addEventListener('mouseenter', markDirty, { passive: true });
     window.addEventListener('scroll', markDirty, { passive: true });
     window.addEventListener('resize', markDirty, { passive: true });
     return () => {
       window.removeEventListener('mousemove', onMove);
+      node.removeEventListener('mouseenter', markDirty);
       window.removeEventListener('scroll', markDirty);
       window.removeEventListener('resize', markDirty);
       settleTimers.forEach((t) => window.clearTimeout(t));

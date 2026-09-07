@@ -17,24 +17,29 @@ export function useMotionTier(): MotionTier {
 
   useEffect(() => {
     const reduceQ = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const coarseQ = window.matchMedia('(hover: none), (pointer: coarse)');
-    const smallQ = window.matchMedia('(max-width: 900px)');
+    const fineQ = window.matchMedia('(pointer: fine)');
+    const hoverQ = window.matchMedia('(hover: hover)');
 
     const compute = () => {
       if (reduceQ.matches) return setTier('none');
-      const cores = navigator.hardwareConcurrency ?? 8;
-      if (coarseQ.matches || smallQ.matches || cores <= 4) return setTier('reduced-hardware');
+      // Desktop / laptop devices with fine pointer, hover capabilities, or desktop viewports get full cinematic features.
+      const isDesktopOrPointer = fineQ.matches || hoverQ.matches || window.innerWidth >= 768;
+      if (!isDesktopOrPointer) {
+        return setTier('reduced-hardware');
+      }
       setTier('full');
     };
 
     compute();
     reduceQ.addEventListener('change', compute);
-    coarseQ.addEventListener('change', compute);
-    smallQ.addEventListener('change', compute);
+    fineQ.addEventListener('change', compute);
+    hoverQ.addEventListener('change', compute);
+    window.addEventListener('resize', compute);
     return () => {
       reduceQ.removeEventListener('change', compute);
-      coarseQ.removeEventListener('change', compute);
-      smallQ.removeEventListener('change', compute);
+      fineQ.removeEventListener('change', compute);
+      hoverQ.removeEventListener('change', compute);
+      window.removeEventListener('resize', compute);
     };
   }, []);
 
@@ -90,7 +95,7 @@ export function usePointerParallax(
   ref.current = handler;
 
   useEffect(() => {
-    if (!enabled || tier !== 'full') return;
+    if (!enabled || tier === 'none') return;
     const fn = (p: PointerState) => ref.current(p);
     subscribers.add(fn);
     bindPointer();
