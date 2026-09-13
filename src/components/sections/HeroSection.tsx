@@ -4,6 +4,9 @@ import { Download } from 'lucide-react';
 import Magnetic from '@/components/cinematic/Magnetic';
 import { useCinematicNavigate } from '@/context/TransitionContext';
 import { useMotionTier, usePointerParallax } from '@/hooks/use-cinematic';
+import Hero3DCube from '@/components/cinematic/Hero3DCube';
+import Card3DTilt from '@/components/cinematic/Card3DTilt';
+import FloatingGeometry3D from '@/components/cinematic/FloatingGeometry3D';
 
 /**
  * Scene 01.
@@ -12,10 +15,7 @@ import { useMotionTier, usePointerParallax } from '@/hooks/use-cinematic';
  * through, the name resolves out of blur with its letter-spacing settling,
  * then the identity line and the calls to action arrive in sequence.
  *
- * Three depth plates move at different rates with the pointer —
- * background grid (subtle), light plate (mid), portrait (foreground,
- * counter-moving) — which is what sells the depth rather than any
- * single big effect.
+ * Integrated 3D Interactive Cyber-Cube canvas and 3D perspective card tilt.
  */
 const HeroSection = () => {
   const gridRef = useRef<HTMLDivElement>(null);
@@ -38,8 +38,6 @@ const HeroSection = () => {
     }
   });
 
-  // The opening blackout plays once per browser session, not on every
-  // return to the home page — a title sequence you cannot skip gets old.
   const [playOpening] = useState(() => {
     if (typeof window === 'undefined') return false;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
@@ -61,8 +59,6 @@ const HeroSection = () => {
     return () => window.clearTimeout(t);
   }, [playOpening]);
 
-  // With the opening blackout the sequence starts later; without it,
-  // content resolves almost immediately.
   const base = playOpening ? 500 : 60;
   const at = (ms: number) => ({ animationDelay: `${base + ms}ms` });
 
@@ -73,6 +69,13 @@ const HeroSection = () => {
       aria-labelledby="hero-heading"
     >
       {playOpening && <div className="cine-blackout" aria-hidden="true" />}
+
+      {/* 3D Interactive Cyber-Cube & Particle Sphere Canvas */}
+      <Hero3DCube />
+
+      {/* Ambient 3D Floating Geometry */}
+      <FloatingGeometry3D className="top-20 right-12" variant="octahedron" />
+      <FloatingGeometry3D className="bottom-20 left-10" variant="ring" />
 
       {/* Depth plate 1 — background grid */}
       <div ref={gridRef} className="absolute inset-0 will-change-transform" aria-hidden="true">
@@ -152,27 +155,29 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Depth plate 3 — portrait, counter-moving */}
+          {/* Depth plate 3 — 3D Tilt Portrait Card */}
           <div
             ref={portraitRef}
             className="lg:w-2/5 relative cine-intro will-change-transform"
             style={at(620)}
           >
-            <div className="w-64 h-64 md:w-80 md:h-80 mx-auto rounded-full overflow-hidden border-4 border-tech-red shadow-lg shadow-tech-red/30 animate-float">
-              <Avatar className="w-full h-full">
-                <AvatarImage
-                  src="/lovable-uploads/profile.png"
-                  alt="Guruprasana E.S, Business Analyst and B.Tech CSBS student"
-                  className="object-cover w-full h-full"
-                />
-                <AvatarFallback className="w-full h-full bg-tech-gray flex items-center justify-center text-tech-red font-orbitron text-lg">
-                  GES
-                </AvatarFallback>
-              </Avatar>
-            </div>
+            <Card3DTilt maxTilt={18} scale={1.05} className="p-4 rounded-3xl bg-tech-black/40 border border-tech-red/40 shadow-2xl backdrop-blur-sm">
+              <div className="w-64 h-64 md:w-80 md:h-80 mx-auto rounded-full overflow-hidden border-4 border-tech-red shadow-lg shadow-tech-red/30 animate-float translate-z-30">
+                <Avatar className="w-full h-full">
+                  <AvatarImage
+                    src="/lovable-uploads/profile.png"
+                    alt="Guruprasana E.S, Business Analyst and B.Tech CSBS student"
+                    className="object-cover w-full h-full"
+                  />
+                  <AvatarFallback className="w-full h-full bg-tech-gray flex items-center justify-center text-tech-red font-orbitron text-lg">
+                    GES
+                  </AvatarFallback>
+                </Avatar>
+              </div>
 
-            <div className="absolute -top-4 -right-4 w-20 h-20 border-t-2 border-r-2 border-tech-red" aria-hidden="true" />
-            <div className="absolute -bottom-4 -left-4 w-20 h-20 border-b-2 border-l-2 border-tech-red" aria-hidden="true" />
+              <div className="absolute -top-4 -right-4 w-20 h-20 border-t-2 border-r-2 border-tech-red translate-z-20" aria-hidden="true" />
+              <div className="absolute -bottom-4 -left-4 w-20 h-20 border-b-2 border-l-2 border-tech-red translate-z-20" aria-hidden="true" />
+            </Card3DTilt>
           </div>
         </div>
       </div>

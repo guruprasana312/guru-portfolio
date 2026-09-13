@@ -3,10 +3,13 @@ import React from 'react';
 import Scene from '@/components/cinematic/Scene';
 import CinematicText from '@/components/cinematic/CinematicText';
 import ScrollLayer from '@/components/cinematic/ScrollLayer';
+import Card3DTilt from '@/components/cinematic/Card3DTilt';
+import FloatingGeometry3D from '@/components/cinematic/FloatingGeometry3D';
 
 const AboutSection = () => {
   return (
     <section id="about" className="section relative overflow-hidden">
+      <FloatingGeometry3D className="top-12 right-10" variant="ring" />
       <div className="absolute inset-0 bg-tech-dark/70 backdrop-blur-[2px]" aria-hidden="true"></div>
       <div className="section-inner relative">
         <Scene direction="none" className="mb-10 text-center lg:text-left">
@@ -16,21 +19,25 @@ const AboutSection = () => {
         <div className="flex flex-col lg:flex-row gap-16 items-center">
           <Scene direction="right" className="lg:w-1/2 relative">
             <ScrollLayer speed={-34} scale={0.02}>
-            {/* About image or decorative element */}
-            <div className="aspect-square max-w-md mx-auto bg-tech-gray relative rounded-lg p-1 border border-tech-red/30 cine-card"
-              data-cursor-label="Explore">
-              <div className="w-full h-full bg-tech-black flex items-center justify-center p-8 rounded-lg">
-                <div className="relative">
-                  {/* Code bracket design element */}
-                  <div className="text-7xl text-tech-red/20 font-mono absolute -top-10 -left-8">{`{`}</div>
-                  <p className="text-gray-300 text-lg relative z-10 leading-relaxed">
-                    "I create digital experiences where <span className="text-tech-red">technology meets design</span>,
-                    with a focus on both functionality and aesthetics."
-                  </p>
-                  <div className="text-7xl text-tech-red/20 font-mono absolute -bottom-10 -right-8">{`}`}</div>
+              <Card3DTilt maxTilt={16} scale={1.04}>
+                {/* About image or decorative element */}
+                <div
+                  className="aspect-square max-w-md mx-auto bg-tech-gray relative rounded-lg p-1 border border-tech-red/30 cine-card preserve-3d"
+                  data-cursor-label="Explore"
+                >
+                  <div className="w-full h-full bg-tech-black flex items-center justify-center p-8 rounded-lg preserve-3d">
+                    <div className="relative preserve-3d">
+                      {/* Code bracket design element */}
+                      <div className="text-7xl text-tech-red/20 font-mono absolute -top-10 -left-8 translate-z-10">{`{`}</div>
+                      <p className="text-gray-300 text-lg relative z-10 leading-relaxed translate-z-30">
+                        "I create digital experiences where <span className="text-tech-red font-semibold">technology meets design</span>,
+                        with a focus on both functionality and aesthetics."
+                      </p>
+                      <div className="text-7xl text-tech-red/20 font-mono absolute -bottom-10 -right-8 translate-z-10">{`}`}</div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </Card3DTilt>
             </ScrollLayer>
 
             {/* Decorative elements */}
@@ -70,13 +77,15 @@ const AboutSection = () => {
               </Scene>
 
               <Scene delay={400}>
-                <div className="mt-8 py-4 px-6 bg-tech-black/50 border border-tech-gray rounded-md cine-card">
-                  <h3 className="text-tech-red font-orbitron text-lg mb-2">My Design Philosophy</h3>
-                  <p className="italic">
-                    "Technology should enhance human experiences, not complicate them. Good design is as much about
-                    what you leave out as what you put in."
-                  </p>
-                </div>
+                <Card3DTilt maxTilt={10} scale={1.02}>
+                  <div className="mt-8 py-4 px-6 bg-tech-black/50 border border-tech-gray rounded-md cine-card preserve-3d">
+                    <h3 className="text-tech-red font-orbitron text-lg mb-2 translate-z-20">My Design Philosophy</h3>
+                    <p className="italic translate-z-10">
+                      "Technology should enhance human experiences, not complicate them. Good design is as much about
+                      what you leave out as what you put in."
+                    </p>
+                  </div>
+                </Card3DTilt>
               </Scene>
             </div>
           </div>

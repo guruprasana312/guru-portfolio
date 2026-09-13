@@ -3,6 +3,7 @@ import Scene from '@/components/cinematic/Scene';
 import Magnetic from '@/components/cinematic/Magnetic';
 import CinematicText from '@/components/cinematic/CinematicText';
 import { useCinematicNavigate } from '@/context/TransitionContext';
+import Card3DTilt from '@/components/cinematic/Card3DTilt';
 
 const ServicesSection = () => {
   const { navigateCinematic } = useCinematicNavigate();
@@ -60,27 +61,29 @@ const ServicesSection = () => {
         <div className="grid md:grid-cols-3 gap-8 cine-focus-group">
           {services.map((service, index) => (
             <Scene key={service.title} delay={index * 120} distance={28}>
-              <div 
-                className="tech-card cine-card cine-focus-item group h-full flex flex-col justify-between border border-tech-gray/60 bg-tech-black/50 p-6 rounded-lg transition-all duration-300"
-                data-cursor="explore"
-              >
-                <div>
-                  <div className="cine-layer-image w-12 h-12 rounded-full bg-tech-red/10 text-tech-red flex items-center justify-center mb-6 group-hover:bg-tech-red group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-tech-red/40">
-                    {service.icon}
+              <Card3DTilt maxTilt={14} scale={1.04} className="h-full">
+                <div 
+                  className="tech-card cine-card cine-focus-item group h-full flex flex-col justify-between border border-tech-gray/60 bg-tech-black/50 p-6 rounded-lg transition-all duration-300 preserve-3d"
+                  data-cursor="explore"
+                >
+                  <div className="preserve-3d">
+                    <div className="cine-layer-image w-12 h-12 rounded-full bg-tech-red/10 text-tech-red flex items-center justify-center mb-6 group-hover:bg-tech-red group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-tech-red/40 translate-z-30">
+                      {service.icon}
+                    </div>
+                    
+                    <h3 className="cine-layer-copy text-xl font-orbitron text-white mb-3 group-hover:text-tech-red transition-colors duration-300 translate-z-20">{service.title}</h3>
+                    <p className="text-gray-400 text-sm leading-relaxed translate-z-10">{service.description}</p>
                   </div>
-                  
-                  <h3 className="cine-layer-copy text-xl font-orbitron text-white mb-3 group-hover:text-tech-red transition-colors duration-300">{service.title}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">{service.description}</p>
-                </div>
 
-                <div className="mt-6 pt-4 border-t border-tech-gray/30 flex items-center text-xs text-tech-red font-orbitron tracking-wider uppercase opacity-80 group-hover:opacity-100">
-                  <span>Tailored Solution</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 transform group-hover:translate-x-1 transition-transform">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                  </svg>
+                  <div className="mt-6 pt-4 border-t border-tech-gray/30 flex items-center text-xs text-tech-red font-orbitron tracking-wider uppercase opacity-80 group-hover:opacity-100 translate-z-10">
+                    <span>Tailored Solution</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2 transform group-hover:translate-x-1 transition-transform">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </div>
                 </div>
-              </div>
+              </Card3DTilt>
             </Scene>
           ))}
         </div>

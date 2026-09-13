@@ -4,6 +4,8 @@ import Magnetic from '@/components/cinematic/Magnetic';
 import CinematicText from '@/components/cinematic/CinematicText';
 import ProjectExpansion, { ExpandableProject } from '@/components/cinematic/ProjectExpansion';
 import { useCinematicNavigate } from '@/context/TransitionContext';
+import Card3DTilt from '@/components/cinematic/Card3DTilt';
+import FloatingGeometry3D from '@/components/cinematic/FloatingGeometry3D';
 
 interface Project extends ExpandableProject {
   image: string;
@@ -79,8 +81,6 @@ const PortfolioSection = () => {
     setOrigin(null);
   }, []);
 
-  // A route change from anywhere else must never leave the sheet stranded
-  // on top of the next page.
   useEffect(() => {
     const onPop = () => closeProject();
     window.addEventListener('popstate', onPop);
@@ -89,6 +89,9 @@ const PortfolioSection = () => {
 
   return (
     <section id="portfolio" className="section bg-tech-black relative overflow-hidden">
+      <FloatingGeometry3D className="top-10 left-5" variant="tetrahedron" />
+      <FloatingGeometry3D className="bottom-12 right-8" variant="octahedron" />
+
       <div className="section-inner relative">
         <Scene direction="none" className="text-center mb-4">
           <p className="cine-scene-label">Scene 05 — Portfolio</p>
@@ -127,69 +130,67 @@ const PortfolioSection = () => {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 cine-focus-group">
           {filtered.map((project, index) => (
             <Scene key={project.title} delay={index * 90} distance={40}>
-              {/* The whole card is one button: the entire surface is the
-                  target, so there is no small link to hunt for. */}
-              <button
-                type="button"
-                ref={(node) => {
-                  cardRefs.current[project.title] = node;
-                }}
-                onClick={() => openProject(project)}
-                data-cursor-label="View Project"
-                aria-label={`View project: ${project.title}`}
-                className="tech-card cine-card cine-focus-item group overflow-hidden border border-tech-gray/60 bg-tech-black/50 rounded-lg p-5 flex flex-col justify-between h-full w-full text-left"
-              >
-                <div className="w-full">
-                  {/* Depth stack: back plate, image plate, copy plate —
-                      each moves at a different rate on hover. */}
-                  <div className="h-48 bg-tech-gray/40 mb-5 overflow-hidden rounded-md relative border border-tech-gray/50 group-hover:border-tech-red/50 transition-colors">
-                    <div className="cine-layer-back absolute inset-0 bg-tech-grid opacity-30" aria-hidden="true" />
-                    <div className="cine-layer-image w-full h-full flex flex-col items-center justify-center text-gray-400 relative z-10">
-                      <div className="w-12 h-12 rounded-full bg-tech-red/10 text-tech-red flex items-center justify-center mb-2 group-hover:bg-tech-red group-hover:text-white transition-all duration-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                          <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                          <circle cx="9" cy="9" r="2" />
-                          <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                        </svg>
+              <Card3DTilt maxTilt={14} scale={1.04} className="h-full w-full">
+                <button
+                  type="button"
+                  ref={(node) => {
+                    cardRefs.current[project.title] = node;
+                  }}
+                  onClick={() => openProject(project)}
+                  data-cursor-label="View Project"
+                  aria-label={`View project: ${project.title}`}
+                  className="tech-card cine-card cine-focus-item group overflow-hidden border border-tech-gray/60 bg-tech-black/50 rounded-lg p-5 flex flex-col justify-between h-full w-full text-left preserve-3d"
+                >
+                  <div className="w-full preserve-3d">
+                    <div className="h-48 bg-tech-gray/40 mb-5 overflow-hidden rounded-md relative border border-tech-gray/50 group-hover:border-tech-red/50 transition-colors preserve-3d">
+                      <div className="cine-layer-back absolute inset-0 bg-tech-grid opacity-30" aria-hidden="true" />
+                      <div className="cine-layer-image w-full h-full flex flex-col items-center justify-center text-gray-400 relative z-10 translate-z-30">
+                        <div className="w-12 h-12 rounded-full bg-tech-red/10 text-tech-red flex items-center justify-center mb-2 group-hover:bg-tech-red group-hover:text-white transition-all duration-300 shadow-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                            <circle cx="9" cy="9" r="2" />
+                            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                          </svg>
+                        </div>
+                        <span className="text-xs font-orbitron tracking-widest uppercase text-gray-300">
+                          {project.title}
+                        </span>
                       </div>
-                      <span className="text-xs font-orbitron tracking-widest uppercase text-gray-300">
-                        {project.title}
-                      </span>
+                      <div
+                        className="absolute inset-0 bg-gradient-to-tr from-tech-red/0 via-tech-red/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-20"
+                        aria-hidden="true"
+                      />
                     </div>
-                    <div
-                      className="absolute inset-0 bg-gradient-to-tr from-tech-red/0 via-tech-red/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-20"
-                      aria-hidden="true"
-                    />
+
+                    <div className="cine-layer-copy translate-z-20">
+                      <span className="text-tech-red text-xs font-orbitron uppercase tracking-wider">
+                        {project.category}
+                      </span>
+                      <h3 className="text-xl font-orbitron text-white mt-1 mb-2 group-hover:text-tech-red transition-colors duration-300">
+                        {project.title}
+                      </h3>
+                      <p className="text-gray-400 text-sm leading-relaxed mb-4">{project.description}</p>
+                    </div>
                   </div>
 
-                  <div className="cine-layer-copy">
-                    <span className="text-tech-red text-xs font-orbitron uppercase tracking-wider">
-                      {project.category}
+                  <div className="pt-4 border-t border-tech-gray/30 flex items-center justify-between mt-auto w-full translate-z-10">
+                    <span className="text-tech-red text-xs font-orbitron uppercase tracking-wider inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                      <span>View Project</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                      </svg>
                     </span>
-                    <h3 className="text-xl font-orbitron text-white mt-1 mb-2 group-hover:text-tech-red transition-colors duration-300">
-                      {project.title}
-                    </h3>
-                    <p className="text-gray-400 text-sm leading-relaxed mb-4">{project.description}</p>
+                    <span className="text-gray-500 text-xs flex items-center gap-1 font-mono">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                      {project.year}
+                    </span>
                   </div>
-                </div>
-
-                <div className="pt-4 border-t border-tech-gray/30 flex items-center justify-between mt-auto w-full">
-                  <span className="text-tech-red text-xs font-orbitron uppercase tracking-wider inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                    <span>View Project</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M5 12h14" />
-                      <path d="m12 5 7 7-7 7" />
-                    </svg>
-                  </span>
-                  <span className="text-gray-500 text-xs flex items-center gap-1 font-mono">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                    {project.year}
-                  </span>
-                </div>
-              </button>
+                </button>
+              </Card3DTilt>
             </Scene>
           ))}
         </div>
