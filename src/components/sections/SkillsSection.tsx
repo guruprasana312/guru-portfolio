@@ -6,6 +6,7 @@ import SkillConstellation, {
   ConstellationCluster,
   ConstellationSkill,
 } from '@/components/cinematic/SkillConstellation';
+import AnalystDashboard from '@/components/cinematic/AnalystDashboard';
 
 /* Single source of truth — the constellation and the progress bars are
    two views of the same data, so they can never drift apart. */
@@ -77,11 +78,15 @@ const SkillsSection = () => {
           </p>
         </Scene>
 
-        {/* The constellation is the centrepiece; the bars below carry the
-            same numbers in a plainly readable form. */}
-        <div className="mb-16 md:mb-20">
+        {/* The constellation is the centrepiece */}
+        <div className="mb-12">
           <SkillConstellation clusters={clusters} skills={constellationSkills} />
         </div>
+
+        {/* Business Analyst & Data Analyst Interactive Matrix */}
+        <Scene delay={160}>
+          <AnalystDashboard />
+        </Scene>
 
         <div className="grid md:grid-cols-2 gap-10 lg:gap-16">
           <div>

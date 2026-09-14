@@ -155,13 +155,19 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Depth plate 3 — 3D Tilt Portrait Card */}
+          {/* Depth plate 3 — 3D Tilt Portrait Card with Analyst Badges */}
           <div
             ref={portraitRef}
             className="lg:w-2/5 relative cine-intro will-change-transform"
             style={at(620)}
           >
-            <Card3DTilt maxTilt={18} scale={1.05} className="p-4 rounded-3xl bg-tech-black/40 border border-tech-red/40 shadow-2xl backdrop-blur-sm">
+            <Card3DTilt maxTilt={18} scale={1.05} className="p-5 rounded-3xl bg-tech-black/50 border border-tech-red/50 shadow-2xl backdrop-blur-md relative preserve-3d">
+              {/* Analyst Floating Tag Badge - Top */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-tech-black/90 border border-tech-red text-tech-light text-[10px] font-orbitron px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 translate-z-40 z-40">
+                <span className="w-1.5 h-1.5 rounded-full bg-tech-red animate-ping" />
+                <span className="tracking-wider uppercase text-white font-semibold">Business Analyst &amp; Data Analyst</span>
+              </div>
+
               <div className="w-64 h-64 md:w-80 md:h-80 mx-auto rounded-full overflow-hidden border-4 border-tech-red shadow-lg shadow-tech-red/30 animate-float translate-z-30">
                 <Avatar className="w-full h-full">
                   <AvatarImage
@@ -175,8 +181,21 @@ const HeroSection = () => {
                 </Avatar>
               </div>
 
-              <div className="absolute -top-4 -right-4 w-20 h-20 border-t-2 border-r-2 border-tech-red translate-z-20" aria-hidden="true" />
-              <div className="absolute -bottom-4 -left-4 w-20 h-20 border-b-2 border-l-2 border-tech-red translate-z-20" aria-hidden="true" />
+              {/* Analyst Role Focus Badges - Bottom */}
+              <div className="mt-4 pt-3 border-t border-tech-gray/50 flex flex-wrap justify-center gap-1.5 translate-z-30">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-tech-red/15 text-tech-red border border-tech-red/40">
+                  📊 Data Analytics
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-tech-red/15 text-tech-red border border-tech-red/40">
+                  💼 Business Systems
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-tech-red/15 text-tech-red border border-tech-red/40">
+                  📈 Power BI &amp; SQL
+                </span>
+              </div>
+
+              <div className="absolute -top-4 -right-4 w-20 h-20 border-t-2 border-r-2 border-tech-red translate-z-20 pointer-events-none" aria-hidden="true" />
+              <div className="absolute -bottom-4 -left-4 w-20 h-20 border-b-2 border-l-2 border-tech-red translate-z-20 pointer-events-none" aria-hidden="true" />
             </Card3DTilt>
           </div>
         </div>
