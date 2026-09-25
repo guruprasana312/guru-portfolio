@@ -59,7 +59,9 @@ const subscribers = new Set<(p: PointerState) => void>();
 let pointerFrame = 0;
 let pointerBound = false;
 
-function onPointerMove(e: MouseEvent) {
+function onPointerMove(e: PointerEvent | MouseEvent) {
+  // Touch keeps its existing behaviour (no pointer-follow while scrolling).
+  if ('pointerType' in e && e.pointerType === 'touch') return;
   pointer.rawX = e.clientX / window.innerWidth - 0.5;
   pointer.rawY = e.clientY / window.innerHeight - 0.5;
 }
@@ -74,28 +76,33 @@ function pointerLoop() {
 function bindPointer() {
   if (pointerBound) return;
   pointerBound = true;
-  window.addEventListener('mousemove', onPointerMove, { passive: true });
+  window.addEventListener('pointermove', onPointerMove, { passive: true });
   pointerFrame = requestAnimationFrame(pointerLoop);
 }
 
 function unbindPointer() {
   if (!pointerBound || subscribers.size > 0) return;
   pointerBound = false;
-  window.removeEventListener('mousemove', onPointerMove);
+  window.removeEventListener('pointermove', onPointerMove);
   cancelAnimationFrame(pointerFrame);
 }
 
-/** Subscribe to the shared smoothed pointer. No-op when motion is limited. */
+/**
+ * Subscribe to the shared smoothed pointer. No-op when motion is limited,
+ * unless `allowReducedMotion` is set — used by the interactive 3D pieces,
+ * which only move in direct response to the user's own pointer.
+ */
 export function usePointerParallax(
   handler: (p: PointerState) => void,
-  enabled = true
+  enabled = true,
+  allowReducedMotion = false
 ) {
   const tier = useMotionTier();
   const ref = useRef(handler);
   ref.current = handler;
 
   useEffect(() => {
-    if (!enabled || tier === 'none') return;
+    if (!enabled || (tier === 'none' && !allowReducedMotion)) return;
     const fn = (p: PointerState) => ref.current(p);
     subscribers.add(fn);
     bindPointer();
@@ -103,7 +110,7 @@ export function usePointerParallax(
       subscribers.delete(fn);
       unbindPointer();
     };
-  }, [enabled, tier]);
+  }, [enabled, tier, allowReducedMotion]);
 }
 
 /* ------------------------------------------------------------------ *

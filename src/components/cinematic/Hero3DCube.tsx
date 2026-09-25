@@ -18,19 +18,31 @@ interface Edge {
  * Projects 3D vertices (x,y,z) into 2D perspective space.
  * Rotates continuously in 3D and reacts to mousemove/touchdrag across ALL viewports:
  * Laptop, Desktop, Tablet, and Mobile.
+ *
+ * Laptop fixes:
+ *  - It no longer disappears when the OS reports `prefers-reduced-motion`
+ *    (Windows "Animation effects" off / battery saver — common on laptops,
+ *    rare on phones). It stays visible and interactive, auto-spin just slows.
+ *  - Geometry scales with the hero size, so it reads properly on wide screens.
+ *  - Rendering pauses while the hero is off-screen or the tab is hidden, so it
+ *    doesn't compete for frames with the rest of the page on laptops.
  */
 export const Hero3DCube: React.FC<{ className?: string }> = ({ className = '' }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pointerRef = useRef({ rotX: 0, rotY: 0, targetRotX: 0, targetRotY: 0 });
   const tier = useMotionTier();
 
-  usePointerParallax((p) => {
-    pointerRef.current.targetRotY = p.x * Math.PI * 0.5;
-    pointerRef.current.targetRotX = -p.y * Math.PI * 0.5;
-  });
+  usePointerParallax(
+    (p) => {
+      pointerRef.current.targetRotY = p.x * Math.PI * 0.5;
+      pointerRef.current.targetRotX = -p.y * Math.PI * 0.5;
+    },
+    true,
+    true
+  );
 
   useEffect(() => {
-    if (tier === 'none') return;
+    const spin = tier === 'none' ? 0.25 : 1;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -39,7 +51,9 @@ export const Hero3DCube: React.FC<{ className?: string }> = ({ className = '' })
     let frame = 0;
     let width = 0;
     let height = 0;
-    let running = true;
+    let running = false;
+    let onScreen = true;
+    let fit = 1;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     // 3D Cube Vertices
@@ -82,9 +96,13 @@ export const Hero3DCube: React.FC<{ className?: string }> = ({ className = '' })
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // Designed for ~800px; grow a bit on big laptop/desktop heroes, shrink on phones.
+      fit = Math.max(0.6, Math.min(1.35, Math.min(width, height) / 700));
     };
     resize();
     window.addEventListener('resize', resize, { passive: true });
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(resize) : null;
+    if (ro && canvas.parentElement) ro.observe(canvas.parentElement);
 
     let angleX = 0;
     let angleY = 0;
@@ -97,9 +115,9 @@ export const Hero3DCube: React.FC<{ className?: string }> = ({ className = '' })
       pointerRef.current.rotX += (pointerRef.current.targetRotX - pointerRef.current.rotX) * 0.05;
       pointerRef.current.rotY += (pointerRef.current.targetRotY - pointerRef.current.rotY) * 0.05;
 
-      angleX += 0.006;
-      angleY += 0.008;
-      angleZ += 0.003;
+      angleX += 0.006 * spin;
+      angleY += 0.008 * spin;
+      angleZ += 0.003 * spin;
 
       const totalRotX = angleX + pointerRef.current.rotX;
       const totalRotY = angleY + pointerRef.current.rotY;
@@ -115,31 +133,31 @@ export const Hero3DCube: React.FC<{ className?: string }> = ({ className = '' })
         let rad = totalRotX;
         let cos = Math.cos(rad);
         let sin = Math.sin(rad);
-        let y1 = p.y * cos - p.z * sin;
-        let z1 = p.y * sin + p.z * cos;
-        let x1 = p.x;
+        const y1 = p.y * cos - p.z * sin;
+        const z1 = p.y * sin + p.z * cos;
+        const x1 = p.x;
 
         // Rotate Y
         rad = totalRotY;
         cos = Math.cos(rad);
         sin = Math.sin(rad);
-        let x2 = x1 * cos + z1 * sin;
-        let z2 = -x1 * sin + z1 * cos;
-        let y2 = y1;
+        const x2 = x1 * cos + z1 * sin;
+        const z2 = -x1 * sin + z1 * cos;
+        const y2 = y1;
 
         // Rotate Z
         rad = totalRotZ;
         cos = Math.cos(rad);
         sin = Math.sin(rad);
-        let x3 = x2 * cos - y2 * sin;
-        let y3 = x2 * sin + y2 * cos;
-        let z3 = z2;
+        const x3 = x2 * cos - y2 * sin;
+        const y3 = x2 * sin + y2 * cos;
+        const z3 = z2;
 
         // Perspective Projection onto 2D
         const distance = fov + z3;
         const scale = fov / Math.max(distance, 50);
-        const px = cx + x3 * scale;
-        const py = cy + y3 * scale;
+        const px = cx + x3 * scale * fit;
+        const py = cy + y3 * scale * fit;
 
         return { px, py, pz: z3, scale };
       };
@@ -191,16 +209,39 @@ export const Hero3DCube: React.FC<{ className?: string }> = ({ className = '' })
       if (running) frame = requestAnimationFrame(render);
     };
 
-    frame = requestAnimationFrame(render);
-
-    return () => {
+    const start = () => {
+      if (running || !onScreen || document.hidden) return;
+      running = true;
+      frame = requestAnimationFrame(render);
+    };
+    const stop = () => {
       running = false;
       cancelAnimationFrame(frame);
+    };
+
+    const io =
+      typeof IntersectionObserver !== 'undefined'
+        ? new IntersectionObserver(([entry]) => {
+            onScreen = entry.isIntersecting;
+            if (onScreen) start();
+            else stop();
+          })
+        : null;
+    io?.observe(canvas);
+
+    const onVisibility = () => (document.hidden ? stop() : start());
+    document.addEventListener('visibilitychange', onVisibility);
+
+    start();
+
+    return () => {
+      stop();
+      io?.disconnect();
+      ro?.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('resize', resize);
     };
   }, [tier]);
-
-  if (tier === 'none') return null;
 
   return (
     <div className={`absolute inset-0 pointer-events-none overflow-hidden ${className}`} aria-hidden="true">
