@@ -156,12 +156,15 @@ const HeroSection = () => {
           </div>
 
           {/* Depth plate 3 — 3D Tilt Portrait Card with Analyst Badges */}
-          <div
-            ref={portraitRef}
-            className="lg:w-2/5 relative cine-intro will-change-transform"
-            style={at(620)}
-          >
-            <Card3DTilt maxTilt={18} scale={1.05} className="p-5 rounded-3xl bg-tech-black/50 border border-tech-red/50 shadow-2xl backdrop-blur-md relative preserve-3d">
+          {/* The intro animation and the mouse parallax live on separate
+              elements: a CSS animation with fill-mode `forwards` overrides
+              inline transforms, which froze the parallax on laptops. */}
+          <div className="lg:w-2/5 relative cine-intro" style={at(620)}>
+          <div ref={portraitRef} className="relative will-change-transform">
+            <Card3DTilt maxTilt={18} scale={1.05} className="p-5 rounded-3xl bg-tech-black/50 border border-tech-red/50 shadow-2xl relative preserve-3d">
+              {/* Frosted backdrop on its own layer — backdrop-filter on the
+                  tilting element itself would flatten the 3D depth layers. */}
+              <div className="absolute inset-0 rounded-[inherit] backdrop-blur-md pointer-events-none" aria-hidden="true" />
               {/* Analyst Floating Tag Badge - Top */}
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-tech-black/90 border border-tech-red text-tech-light text-[10px] font-orbitron px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 translate-z-40 z-40">
                 <span className="w-1.5 h-1.5 rounded-full bg-tech-red animate-ping" />
@@ -197,6 +200,7 @@ const HeroSection = () => {
               <div className="absolute -top-4 -right-4 w-20 h-20 border-t-2 border-r-2 border-tech-red translate-z-20 pointer-events-none" aria-hidden="true" />
               <div className="absolute -bottom-4 -left-4 w-20 h-20 border-b-2 border-l-2 border-tech-red translate-z-20 pointer-events-none" aria-hidden="true" />
             </Card3DTilt>
+          </div>
           </div>
         </div>
       </div>

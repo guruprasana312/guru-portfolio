@@ -146,10 +146,21 @@
     transform-style: preserve-3d;
   }
 
-  .translate-z-10 { transform: translateZ(10px); }
-  .translate-z-20 { transform: translateZ(20px); }
-  .translate-z-30 { transform: translateZ(30px); }
-  .translate-z-40 { transform: translateZ(40px); }
+  /* Depth offsets use the independent `translate` property so they compose
+     with Tailwind transforms (-translate-x-1/2, animate-float, hover scale…)
+     instead of being silently overwritten by them. */
+  .translate-z-10 { translate: 0 0 10px; }
+  .translate-z-20 { translate: 0 0 20px; }
+  .translate-z-30 { translate: 0 0 30px; }
+  .translate-z-40 { translate: 0 0 40px; }
+
+  /* Inside a 3D tilt card the tilt itself is the hover response. The
+     generic card lift/scale fought the tilt transform on laptops (mouse
+     hover), making the card jump and double-scale. */
+  .tilt-3d .cine-card:hover,
+  .tilt-3d .cine-card:focus-within {
+    transform: translate3d(0, 0, 0);
+  }
 
   .animate-spin-3d {
     animation: spin-3d 24s linear infinite;
@@ -177,7 +188,9 @@
 
   .cine-reveal.is-visible {
     opacity: 1;
-    filter: blur(0);
+    /* `none`, not blur(0): any filter value flattens 3D children and keeps
+       an extra GPU layer alive on desktop browsers. */
+    filter: none;
     transform: translate3d(0, 0, 0) scale(1);
     will-change: auto;
   }
@@ -270,7 +283,7 @@
   @keyframes cine-in {
     to {
       opacity: 1;
-      filter: blur(0);
+      filter: none;
       transform: translate3d(0, 0, 0);
     }
   }
@@ -1106,6 +1119,9 @@
     opacity: 1 !important;
     filter: none !important;
   }
+
+  /* Decorative 3D spin stays, just much slower */
+  .animate-spin-3d { animation-duration: 90s !important; }
 
   .animate-float,
   .animate-pulse-glow,
